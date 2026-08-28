@@ -1,0 +1,5 @@
+{
+  "name": "everything-to-markdown",
+  "description": "Convert PDF/Word/PPT/Excel/images to Markdown locally. Detects Microsoft Office vs WPS.",
+  "version": "1.0.0"
+}

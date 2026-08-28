@@ -1,0 +1,10 @@
+# everything-to-markdown
+*.converted.md
+*_2_OCR.pdf
+*.__doc2md.*
+__pycache__/
+*.pyc
+.venv/
+.doc2md-python
+office-detect.json
+.DS_Store
