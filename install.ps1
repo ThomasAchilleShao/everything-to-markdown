@@ -3,13 +3,50 @@ param(
   [string]$Agents = "claude,codex,grok,cursor",
   [switch]$NoDeps,
   [switch]$NoOcr,
-  [switch]$Force
+  [switch]$Force,
+  [switch]$DesktopOnly,
+  [switch]$NoDesktop
 )
 
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $SkillSrc = Join-Path $Root "skills\everything-to-markdown"
 $Venv = Join-Path $Root ".venv"
+$Utf8Bom = New-Object System.Text.UTF8Encoding $true
+
+function Test-Tesseract {
+  if (Get-Command tesseract -ErrorAction SilentlyContinue) { return $true }
+  return Test-Path "C:\Program Files\Tesseract-OCR\tesseract.exe"
+}
+
+function Write-DesktopBat([string]$TemplateName, [string]$DestName) {
+  $tpl = Join-Path $Root "desktop\$TemplateName"
+  if (-not (Test-Path $tpl)) { throw "missing template $tpl" }
+  $desktop = [Environment]::GetFolderPath("Desktop")
+  $dest = Join-Path $desktop $DestName
+  $content = [System.IO.File]::ReadAllText($tpl)
+  $content = $content.Replace("__ROOT__", $Root)
+  [System.IO.File]::WriteAllText($dest, $content, $Utf8Bom)
+  Write-Host "desktop: $dest"
+}
+
+function Install-DesktopBats {
+  Write-DesktopBat "普通转换.bat" "普通转换.bat"
+  if (Test-Tesseract) {
+    Write-DesktopBat "扫描转换.bat" "扫描转换.bat"
+  } else {
+    Write-Host "未检测到 Tesseract，只生成桌面「普通转换.bat」。扫描件需要时再装 Tesseract，然后运行: .\install.ps1 -DesktopOnly -Agents `"`""
+  }
+}
+
+if ($DesktopOnly) {
+  $vpy = Join-Path $Venv "Scripts\python.exe"
+  if (-not (Test-Path $vpy)) {
+    throw "还没安装依赖。请先在项目文件夹运行: .\install.ps1 -Agents `"`""
+  }
+  Install-DesktopBats
+  exit 0
+}
 
 $py = Get-Command python -ErrorAction SilentlyContinue
 if (-not $py) { $py = Get-Command py -ErrorAction SilentlyContinue }
@@ -47,6 +84,7 @@ function Install-Skill([string]$Dest) {
 if ($Agents -eq "all") { $Agents = "claude,codex,grok,cursor" }
 foreach ($a in $Agents.Split(",")) {
   $name = $a.Trim()
+  if ($name -eq "") { continue }
   switch ($name) {
     "claude" { Install-Skill "$env:USERPROFILE\.claude\skills\everything-to-markdown" }
     "codex" { Install-Skill "$env:USERPROFILE\.codex\skills\everything-to-markdown" }
@@ -56,5 +94,11 @@ foreach ($a in $Agents.Split(",")) {
   }
 }
 
+if (-not $NoDesktop) {
+  Install-DesktopBats
+}
+
 Write-Host "Python: $vpy"
-Get-Content (Join-Path $Root "office-detect.json")
+if (Test-Path (Join-Path $Root "office-detect.json")) {
+  Get-Content (Join-Path $Root "office-detect.json")
+}

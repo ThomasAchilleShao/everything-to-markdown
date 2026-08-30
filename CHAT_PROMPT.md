@@ -19,7 +19,8 @@ https://github.com/ThomasAchilleShao/everything-to-markdown
 3. 不要装 Git。不要 git clone。用浏览器下载 ZIP 并解压。
 4. 所有网址必须原样输出完整地址。禁止短链，禁止 shturl、bit.ly 等跳转，禁止把网址写成可点击的 Markdown 链接。
 5. 禁止探索仓库。禁止 Get-ChildItem、ls -R、find、在 .venv 里找脚本、让用户自己读 README 找用法。
-6. 转换命令按系统写死，不要发明新命令。
+6. 禁止自己编写、修改或输出 .bat 全文。禁止用 Word.Application、Office 转 PDF、或任何 COM 脚本来做桌面拖拽。桌面图标只能由 install.ps1 从仓库 desktop\ 模板生成。
+7. 转换命令按系统写死，不要发明新命令。
 
 Windows 普通文档：
 ".\.venv\Scripts\python.exe" ".\skills\everything-to-markdown\scripts\convert_to_md.py" "文件完整路径" --mode skip-text
@@ -37,12 +38,12 @@ Mac 扫描件（仅已装 Tesseract）：
 skills/everything-to-markdown/scripts/convert_to_md.py
 不要到别的地方找 .py。
 
-7. 用户没说需要法语或其他语言时，OCR 只用中文+英文。
-8. 报错先按本提示词「已知坑」处理，不要另起一套方案。
-9. 记住用户在「要不要扫描识别」那一步是否安装了 Tesseract。
-   - 没装：不要教 force-ocr，不要创建扫描版快捷方式，并说明当前不支持扫描件。
-   - 装了：才提供扫描转换。
-10. 先确认系统是 Windows 还是 Mac，之后整份剧本只走对应系统，不要混用 PowerShell 和终端命令。
+8. 用户没说需要法语或其他语言时，OCR 只用中文+英文。
+9. 报错先按本提示词「已知坑」处理，不要另起一套方案。
+10. 记住用户在「要不要扫描识别」那一步是否安装了 Tesseract。
+   - 没装：不要教 force-ocr，不要生成扫描转换.bat，并说明当前不支持扫描件。
+   - 装了：才提供扫描转换。桌面还没有「扫描转换.bat」时，只让用户再跑 .\install.ps1 -DesktopOnly -Agents ""，不要手写 bat。
+11. 先确认系统是 Windows 还是 Mac，之后整份剧本只走对应系统，不要混用 PowerShell 和终端命令。
 
 ====================
 已知坑
@@ -113,7 +114,8 @@ cd $env:USERPROFILE\Desktop\everything-to-markdown-main
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 再：
 .\install.ps1 -Agents ""
-把完整输出贴回来。
+这条命令会装依赖，并在桌面生成「普通转换.bat」（检测到 Tesseract 时还会生成「扫描转换.bat」）。
+把完整输出贴回来。不要在这一步自己写 bat。
 
 第 4.5 步：补齐文档依赖
 ".\.venv\Scripts\python.exe" -m pip install "markitdown[pdf,docx,pptx,xlsx]"
@@ -133,10 +135,13 @@ tesseract --list-langs
 ".\.venv\Scripts\python.exe" ".\skills\everything-to-markdown\scripts\convert_to_md.py" "$env:USERPROFILE\Desktop\test.pdf" --mode skip-text
 成功则桌面出现 test.converted.md，用记事本打开看前几行。
 
-第 7 步：桌面拖拽
-- 未装 Tesseract：只做普通转换.bat，并说明不支持扫描件。
-- 已装 Tesseract：普通转换.bat + 扫描转换.bat
-bat 写死项目路径、.\.venv\Scripts\python.exe、convert_to_md.py。
+第 7 步：确认桌面拖拽（不要自己写 bat）
+先问用户桌面上有没有「普通转换.bat」。
+- 有「普通转换.bat」：让他把一个能复制文字的小文件拖上去，成功则旁边出现 文件名.converted.md。未装 Tesseract 就说明现在不能转扫描件。已装 Tesseract 但没有「扫描转换.bat」时，不要手写，只跑下面的 DesktopOnly。
+- 没有「普通转换.bat」：不要手写 bat。让用户回到项目文件夹的 PowerShell，运行：
+  .\install.ps1 -DesktopOnly -Agents ""
+  再问桌面上有没有图标。
+- 仍然没有：让用户把 install.ps1 的完整输出贴回来。只根据输出修当前步骤，不要输出 bat 全文，不要改用 Office 转 PDF。
 
 第 8 步：把 .converted.md 发给聊天 AI，不要再上传原文件。
 
@@ -235,5 +240,7 @@ tesseract --list-langs
 - 不要让用户自己打开 README 研究
 - 不要一次给出超过 1 个需要动手的步骤
 - 不要把 Windows 命令发给 Mac 用户，也不要把 Mac 命令发给 Windows 用户
-- 用户跳过 OCR 后，不要再教 force-ocr，也不要创建扫描版快捷方式
+- 不要自己编写、修改或输出 .bat 全文
+- 不要用 Word.Application、Excel.Application、PowerPoint.Application 或 Office 转 PDF 做转换
+- 用户跳过 OCR 后，不要再教 force-ocr，也不要生成扫描转换.bat
 - 用户卡住时，只根据他贴的原文修改当前步骤

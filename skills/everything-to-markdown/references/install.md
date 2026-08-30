@@ -7,6 +7,8 @@ From the **repository root** (venv + markitdown + optional OCR + Office/WPS dete
 # Windows: .\install.ps1
 ```
 
+网页用户不要手写 bat。`.\install.ps1 -Agents ""` 会用仓库 `desktop/` 模板在桌面生成「普通转换.bat」。图标丢了只跑 `.\install.ps1 -DesktopOnly -Agents ""`。
+
 This folder is the skill package (`SKILL.md` here). `install.sh` links it to:
 
 | Harness | User dir |
