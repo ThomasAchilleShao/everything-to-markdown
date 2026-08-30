@@ -4,7 +4,7 @@ Agent skill: convert PDF / Word / PPT / Excel / images to Markdown **on disk**, 
 
 Detects whether the machine uses **Microsoft Office** or **WPS** (and LibreOffice as fallback) and uses that suite to open `.doc` / `.wps` / `.xls` / `.ppt` before extraction.
 
-###「聊天式AI（非自主Agent）用户不要读下面的 Agent 安装，只复制 CHAT_PROMPT.md。」
+###「聊天式AI（非自主Agent）用户不要读下面有关 Agent 安装的内容，只看复制 CHAT_PROMPT.md。」
 
 Layout matches [Agent Skills](https://agentskills.io/specification) / [skills.sh](https://skills.sh/) (`skills/<name>/SKILL.md`).
 
